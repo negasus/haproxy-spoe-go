@@ -112,6 +112,7 @@ func Encode(data interface{}, buf []byte) ([]byte, int, error) {
 	case []byte:
 		buf = append(buf, TypeBinary)
 		buf = append(buf, v...)
+		return buf, len(v) + 1, nil
 	}
 
 	return nil, 0, fmt.Errorf("type not supported for encode to TypedData: %s", reflect.TypeOf(data).String())
