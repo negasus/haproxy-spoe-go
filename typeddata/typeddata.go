@@ -181,8 +181,15 @@ func Decode(buf []byte) (data interface{}, n int, err error) {
 		return
 
 	case TypeBinary:
-		data = buf
-		n = len(buf)
+		dataLen, i := varint.Uvarint(buf)
+		n += i
+		buf = buf[i:]
+		if len(buf) < int(dataLen) {
+			err = ErrDecodingBufferTooSmall
+			return
+		}
+		data = buf[:dataLen]
+		n += int(dataLen)
 		return
 	}
 
