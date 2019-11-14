@@ -1,4 +1,4 @@
-# Haproxy SPOE Golang Agent Library
+# Haproxy SPOE Golang Agent Library [![Go Report Card](https://goreportcard.com/badge/github.com/negasus/haproxy-spoe-go)](https://goreportcard.com/report/github.com/negasus/haproxy-spoe-go) ![](https://github.com/negasus/haproxy-spoe-go/workflows/Test/badge.svg)
 
 Terms from [Haproxy SPOE specification](https://www.haproxy.org/download/1.9/doc/SPOE.txt) 
 
