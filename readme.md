@@ -179,7 +179,7 @@ Contains message key-value data sent by Haproxy
 
 #### Get(key string) (interface{}, bool)
 
-Returns value by name. If key doesn't exist, last returned value will be set to True
+Returns value by name. If key doesn't exist, last returned value will be set to False
 
 ```
 ipValue, ok := message.KV.Get("ip")
