@@ -48,6 +48,4 @@ func (w *worker) processNotifyFrame(f *frame.Frame) {
 	if n != buf.Len() {
 		log.Printf("write wrong data count %d, expect %d", n, buf.Len())
 	}
-
-	log.Printf("[DEBUG] write %d bytes ack frame", buf.Len())
 }
