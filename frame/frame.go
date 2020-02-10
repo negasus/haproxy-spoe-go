@@ -77,7 +77,7 @@ func (f *Frame) Reset() {
 	f.Healthcheck = false
 	f.MaxFrameSize = 0
 
-	f.Actions.Reset()
+	f.Actions = action.NewActions()
 	f.Messages.Reset()
 	f.KV.Reset()
 }
