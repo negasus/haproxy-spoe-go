@@ -77,7 +77,8 @@ func (f *Frame) Reset() {
 	f.Healthcheck = false
 	f.MaxFrameSize = 0
 
-	f.Actions.Reset()
+	// we want to acquire a new Actions as they are shared with Request
+	f.Actions = action.NewActions()
 	f.Messages.Reset()
 	f.KV.Reset()
 }
