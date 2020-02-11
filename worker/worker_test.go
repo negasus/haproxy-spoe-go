@@ -65,7 +65,6 @@ func TestWorkerConcurrent(t *testing.T) {
 		Handle(server2, m.Handle)
 	}()
 	duration := time.Second
-	assert.NoError(t, spoe2.Init())
 	loop := func(s client.Client) {
 		assert.NoError(t, s.Init())
 		for {
