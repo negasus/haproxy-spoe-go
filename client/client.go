@@ -10,15 +10,18 @@ import (
 	"net"
 )
 
+/// Client is a simple client for spop protocol, this should only be used for testing purpose
 type Client struct {
 	conn   net.Conn
 	reader io.Reader
 }
 
+/// NewClient create a new Client for an established connection
 func NewClient(conn net.Conn) Client {
 	return Client{conn: conn, reader: bufio.NewReader(conn)}
 }
 
+/// Init initialize the client by sending the HaproxyHello frame
 func (c *Client) Init() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)
@@ -59,6 +62,7 @@ func (c *Client) send(f *frame.Frame) error {
 	return nil
 }
 
+/// Notify send an empty Notify frame
 func (c *Client) Notify() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)
@@ -74,10 +78,10 @@ func (c *Client) Notify() error {
 	responseFrame := frame.AcquireFrame()
 	defer frame.ReleaseFrame(responseFrame)
 	responseFrame.Read(c.reader)
-
 	return nil
-
 }
+
+/// Stop the client by sending HaproxyDisconnect frame
 func (c *Client) Stop() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)
