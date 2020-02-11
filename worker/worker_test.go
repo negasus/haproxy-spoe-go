@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"fmt"
 	"github.com/negasus/haproxy-spoe-go/client"
 	"github.com/negasus/haproxy-spoe-go/request"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +17,6 @@ type MockedHandler struct {
 
 func (h *MockedHandler) Handle(r *request.Request) {
 	h.m.MethodCalled("handle", r)
-	fmt.Println("test")
 }
 
 func (h *MockedHandler) Finish() {
@@ -43,6 +41,47 @@ func TestWorker(t *testing.T) {
 	// Lets wait a bit to have everything finished
 	<-time.After(time.Millisecond * 100)
 	clientConn.Close()
+
+	m.m.AssertExpectations(t)
+
+}
+
+/*
+ * simple test that check for race condition
+ * tests need to be run with -race
+ */
+func TestWorkerConcurrent(t *testing.T) {
+	clientConn, server := net.Pipe()
+	clientConn2, server2 := net.Pipe()
+	spoe := client.NewClient(clientConn)
+	spoe2 := client.NewClient(clientConn2)
+	var m MockedHandler
+	m.m.On("handle", mock.Anything)
+
+	go func() {
+		Handle(server, m.Handle)
+	}()
+	go func() {
+		Handle(server2, m.Handle)
+	}()
+	duration := time.Second
+	assert.NoError(t, spoe2.Init())
+	loop := func(s client.Client) {
+		assert.NoError(t, s.Init())
+		for {
+			select {
+			case <-time.After(duration):
+				s.Stop()
+			default:
+				s.Notify()
+			}
+		}
+	}
+	go loop(spoe)
+	go loop(spoe2)
+
+	// Lets wait a bit to have everything finished
+	<-time.After(duration)
 
 	m.m.AssertExpectations(t)
 
