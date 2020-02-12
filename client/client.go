@@ -40,7 +40,15 @@ func (c *Client) Init() error {
 	responseFrame := frame.AcquireFrame()
 	defer frame.ReleaseFrame(responseFrame)
 	responseFrame.Read(c.reader)
-	// todo read frame
+
+	switch responseFrame.Type {
+	case frame.TypeAgentHello:
+		if responseFrame.FrameID != uint64(0) || responseFrame.StreamID != uint64(0) {
+			return fmt.Errorf("FrameID or StreamID mismatch")
+		}
+	default:
+		return fmt.Errorf("unexpected frame type: %v", responseFrame.Type)
+	}
 
 	return nil
 
