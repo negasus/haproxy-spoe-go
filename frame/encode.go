@@ -41,7 +41,11 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 			}
 		}
 	case TypeNotify:
-		//todo marshal messages
+		if len(*f.Messages) > 0 {
+			err = fmt.Errorf("Encoding Notify frame with Message isn't handled yet")
+			return
+
+		}
 	default:
 		err = fmt.Errorf("unexpected frame type %d", f.Type)
 		return
