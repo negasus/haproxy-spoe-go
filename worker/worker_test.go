@@ -85,3 +85,31 @@ func TestWorkerConcurrent(t *testing.T) {
 	m.m.AssertExpectations(t)
 
 }
+
+/*
+ * Simple bench to compare memory usage
+ *
+ */
+func BenchmarkWorker(b *testing.B) {
+	clientConn, server := net.Pipe()
+	spoe := client.NewClient(clientConn)
+	var m MockedHandler
+	m.m.On("handle", mock.Anything)
+	m.m.On("Finished")
+
+	go func() {
+		Handle(server, m.Handle)
+		m.Finish()
+	}()
+
+	spoe.Init()
+	for n := 0; n < b.N; n++ {
+		spoe.Notify()
+	}
+	spoe.Stop()
+
+	// Lets wait a bit to have everything finished
+	<-time.After(time.Millisecond * 100)
+	clientConn.Close()
+
+}
