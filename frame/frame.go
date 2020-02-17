@@ -59,7 +59,6 @@ func NewFrame() *Frame {
 		Flags:     0x01,
 		KV:        kv.AcquireKV(),
 		Messages:  message.NewMessages(),
-		Actions:   action.NewActions(),
 		tmp:       make([]byte, 4),
 		varintBuf: make([]byte, 10),
 	}
@@ -77,8 +76,7 @@ func (f *Frame) Reset() {
 	f.Healthcheck = false
 	f.MaxFrameSize = 0
 
-	// we want to acquire a new Actions as they are shared with Request
-	f.Actions = action.NewActions()
+	f.Actions = nil
 	f.Messages.Reset()
 	f.KV.Reset()
 }

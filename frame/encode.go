@@ -34,10 +34,12 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 		}
 
 	case TypeAgentAck:
-		for _, act := range *f.Actions {
-			payload, err = (*act).Marshal(payload)
-			if err != nil {
-				return
+		if f.Actions != nil {
+			for _, act := range *f.Actions {
+				payload, err = (*act).Marshal(payload)
+				if err != nil {
+					return
+				}
 			}
 		}
 	case TypeNotify:
