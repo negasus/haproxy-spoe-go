@@ -11,7 +11,7 @@ func (f *Frame) Read(src io.Reader) error {
 	var n int
 	var err error
 
-	n, err = src.Read(f.tmp)
+	n, err = io.ReadFull(src, f.tmp)
 	if err != nil {
 		if err == io.EOF {
 			return err
