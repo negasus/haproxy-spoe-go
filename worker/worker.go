@@ -45,10 +45,10 @@ func (w *worker) run() error {
 
 	var f *frame.Frame
 
+	buf := bufio.NewReader(w.conn)
+
 	for {
 		f = frame.AcquireFrame()
-
-		buf := bufio.NewReader(w.conn)
 
 		if err := f.Read(buf); err != nil {
 			frame.ReleaseFrame(f)
