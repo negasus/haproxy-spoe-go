@@ -14,14 +14,14 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 
 	buf.WriteByte(byte(f.Type))
 
-	binary.BigEndian.PutUint32(f.tmp, f.Flags)
+	binary.BigEndian.PutUint32(f.tmp[:], f.Flags)
 
-	buf.Write(f.tmp)
+	buf.Write(f.tmp[0:4])
 
-	n = varint.PutUvarint(f.varintBuf, f.StreamID)
+	n = varint.PutUvarint(f.varintBuf[:], f.StreamID)
 	buf.Write(f.varintBuf[:n])
 
-	n = varint.PutUvarint(f.varintBuf, f.FrameID)
+	n = varint.PutUvarint(f.varintBuf[:], f.FrameID)
 	buf.Write(f.varintBuf[:n])
 
 	var payload []byte
@@ -55,19 +55,17 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 
 	buf.Write(payload)
 
-	frameSizeBuf := make([]byte, 4)
+	binary.BigEndian.PutUint32(f.tmp[:], uint32(buf.Len()))
 
-	binary.BigEndian.PutUint32(frameSizeBuf, uint32(buf.Len()))
-
-	n, err = dest.Write(frameSizeBuf)
-	if err != nil || n != len(frameSizeBuf) {
-		return 0, fmt.Errorf("error write frameSize. writes %d, expect %d, err: %v", n, len(frameSizeBuf), err)
+	n, err = dest.Write(f.tmp[0:4])
+	if err != nil || n != 4 {
+		return 0, fmt.Errorf("error write frameSize. writes %d, expect %d, err: %v", n, len(f.tmp), err)
 	}
 
 	n, err = dest.Write(buf.Bytes())
 	if err != nil || n != buf.Len() {
-		return 0, fmt.Errorf("error write frame. writes %d, expect %d, err: %v", n, len(frameSizeBuf), err)
+		return 0, fmt.Errorf("error write frame. writes %d, expect %d, err: %v", n, len(f.tmp), err)
 	}
 
-	return len(frameSizeBuf) + buf.Len(), nil
+	return 4 + buf.Len(), nil
 }
