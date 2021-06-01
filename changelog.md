@@ -1,5 +1,9 @@
 # Changelog
 
+# v1.0.2 (2021-06-01)
+
+- fix-oom-on-http-requests (#9)
+
 # v1.0.1 (2021-01-07)
 
 - add license
