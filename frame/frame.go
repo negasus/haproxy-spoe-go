@@ -48,19 +48,17 @@ type Frame struct {
 	Messages     *message.Messages
 	Actions      *action.Actions
 
-	tmp       []byte
-	varintBuf []byte
+	tmp       [5]byte
+	varintBuf [10]byte
 }
 
 // NewFrame creates and returns new Frame
 // Fin byte in Flags already set
 func NewFrame() *Frame {
 	f := &Frame{
-		Flags:     0x01,
-		KV:        kv.AcquireKV(),
-		Messages:  message.NewMessages(),
-		tmp:       make([]byte, 4),
-		varintBuf: make([]byte, 10),
+		Flags:    0x01,
+		KV:       kv.AcquireKV(),
+		Messages: message.NewMessages(),
 	}
 
 	return f

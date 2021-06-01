@@ -11,7 +11,7 @@ func (f *Frame) Read(src io.Reader) error {
 	var n int
 	var err error
 
-	n, err = io.ReadFull(src, f.tmp)
+	n, err = io.ReadFull(src, f.tmp[:])
 	if err != nil {
 		if err == io.EOF {
 			return err
@@ -19,22 +19,31 @@ func (f *Frame) Read(src io.Reader) error {
 		return fmt.Errorf("error read frame size, %v", err)
 	}
 
-	f.Len = binary.BigEndian.Uint32(f.tmp)
+	f.Len = binary.BigEndian.Uint32(f.tmp[0:4])
+	f.Type = Type(f.tmp[4])
 
-	buf := make([]byte, f.Len)
+	// Drop packet that doesn't have defined frame type early, before allocating any buffers
+	// that way spurious connectons (say someone calling curl on port) won't cause it to
+	// allocate gigabytes of RAM
+	switch f.Type {
+	case TypeHaproxyHello, TypeHaproxyDisconnect, TypeNotify, TypeAgentHello, TypeAgentDisconnect, TypeAgentAck:
+	default:
+		return fmt.Errorf("unexpected frame type %d", f.Type)
+	}
+
+	buf := make([]byte, f.Len-1)
 
 	n, err = io.ReadFull(src, buf)
 	if err != nil {
 		return fmt.Errorf("error read frame, %v", err)
 	}
 
-	if uint32(n) != f.Len {
+	if uint32(n) != f.Len-1 {
 		return fmt.Errorf("unexpected frame length %d, expect %d", n, f.Len)
 	}
 
-	f.Type = Type(buf[0])
-	f.Flags = binary.BigEndian.Uint32(buf[1:5])
-	buf = buf[5:]
+	f.Flags = binary.BigEndian.Uint32(buf[0:4])
+	buf = buf[4:]
 
 	f.StreamID, n = varint.Uvarint(buf)
 	buf = buf[n:]
