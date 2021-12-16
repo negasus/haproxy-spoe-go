@@ -1,5 +1,9 @@
 # Changelog
 
+# v1.0.3 (2021-12-16)
+
+- support for parsing IPv6 addresses (#11)
+
 # v1.0.2 (2021-06-01)
 
 - fix-oom-on-http-requests (#9)
