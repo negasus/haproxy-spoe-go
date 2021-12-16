@@ -168,6 +168,11 @@ func Decode(buf []byte) (data interface{}, n int, err error) {
 		n += 4
 		return
 
+	case TypeIPv6:
+		data = net.IP(buf[:16])
+		n += 16
+		return
+
 	case TypeString:
 		sLen, i := varint.Uvarint(buf)
 		n += i
