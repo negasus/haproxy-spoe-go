@@ -3,11 +3,12 @@ package worker
 import (
 	"bufio"
 	"fmt"
-	"github.com/negasus/haproxy-spoe-go/frame"
-	"github.com/negasus/haproxy-spoe-go/request"
 	"io"
-	"log"
 	"net"
+
+	"github.com/negasus/haproxy-spoe-go/frame"
+	"github.com/negasus/haproxy-spoe-go/logger"
+	"github.com/negasus/haproxy-spoe-go/request"
 )
 
 const (
@@ -15,14 +16,15 @@ const (
 )
 
 // Handle listen connection and process frames
-func Handle(conn net.Conn, handler func(*request.Request)) {
+func Handle(conn net.Conn, handler func(*request.Request), logger logger.Logger) {
 	w := &worker{
 		conn:    conn,
 		handler: handler,
+		logger:  logger,
 	}
 
 	if err := w.run(); err != nil {
-		log.Printf("error handle worker: %v", err)
+		logger.Errorf("handle worker: %v", err)
 	}
 }
 
@@ -31,11 +33,13 @@ type worker struct {
 	ready    bool
 	engineID string
 	handler  func(*request.Request)
+
+	logger logger.Logger
 }
 
 func (w *worker) close() {
 	if err := w.conn.Close(); err != nil {
-		log.Printf("error close connection: %v", err)
+		w.logger.Errorf("close connection: %v", err)
 	}
 }
 
@@ -99,7 +103,7 @@ func (w *worker) run() error {
 			go w.processNotifyFrame(f)
 
 		default:
-			log.Printf("unexpected frame type: %v", f.Type)
+			w.logger.Warnf("unexpected frame type: %v", f.Type)
 		}
 	}
 }

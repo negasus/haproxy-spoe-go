@@ -1,14 +1,17 @@
 package agent
 
 import (
+	"net"
+
+	"github.com/negasus/haproxy-spoe-go/logger"
 	"github.com/negasus/haproxy-spoe-go/request"
 	"github.com/negasus/haproxy-spoe-go/worker"
-	"net"
 )
 
-func New(handler func(*request.Request)) *Agent {
+func New(handler func(*request.Request), logger logger.Logger) *Agent {
 	agent := &Agent{
 		handler: handler,
+		logger:  logger,
 	}
 
 	return agent
@@ -16,6 +19,7 @@ func New(handler func(*request.Request)) *Agent {
 
 type Agent struct {
 	handler func(*request.Request)
+	logger  logger.Logger
 }
 
 func (agent *Agent) Serve(listener net.Listener) error {
@@ -28,6 +32,6 @@ func (agent *Agent) Serve(listener net.Listener) error {
 			return err
 		}
 
-		go worker.Handle(conn, agent.handler)
+		go worker.Handle(conn, agent.handler, agent.logger)
 	}
 }

@@ -1,14 +1,16 @@
 package worker
 
 import (
+	"net"
+	"testing"
+	"time"
+
 	"github.com/negasus/haproxy-spoe-go/client"
+	"github.com/negasus/haproxy-spoe-go/logger"
 	"github.com/negasus/haproxy-spoe-go/request"
 	"github.com/stretchr/testify/assert"
 	_ "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net"
-	"testing"
-	"time"
 )
 
 type MockedHandler struct {
@@ -31,7 +33,7 @@ func TestWorker(t *testing.T) {
 	m.m.On("Finished")
 
 	go func() {
-		Handle(server, m.Handle)
+		Handle(server, m.Handle, logger.NewNop())
 		m.Finish()
 	}()
 	assert.NoError(t, spoe.Init())
@@ -59,10 +61,10 @@ func TestWorkerConcurrent(t *testing.T) {
 	m.m.On("handle", mock.Anything)
 
 	go func() {
-		Handle(server, m.Handle)
+		Handle(server, m.Handle, logger.NewNop())
 	}()
 	go func() {
-		Handle(server2, m.Handle)
+		Handle(server2, m.Handle, logger.NewNop())
 	}()
 	duration := time.Second
 	loop := func(s client.Client) {
@@ -98,7 +100,7 @@ func BenchmarkWorker(b *testing.B) {
 	m.m.On("Finished")
 
 	go func() {
-		Handle(server, m.Handle)
+		Handle(server, m.Handle, logger.NewNop())
 		m.Finish()
 	}()
 
