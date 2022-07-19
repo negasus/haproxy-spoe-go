@@ -1,6 +1,6 @@
 # Haproxy SPOE Golang Agent Library [![Go Report Card](https://goreportcard.com/badge/github.com/negasus/haproxy-spoe-go)](https://goreportcard.com/report/github.com/negasus/haproxy-spoe-go) ![](https://github.com/negasus/haproxy-spoe-go/workflows/Test/badge.svg)
 
-Terms from [Haproxy SPOE specification](https://www.haproxy.org/download/1.9/doc/SPOE.txt) 
+Terms from [Haproxy SPOE specification](https://www.haproxy.org/download/1.9/doc/SPOE.txt)
 
 ```
 * SPOE : Stream Processing Offload Engine.
@@ -42,7 +42,7 @@ Example from Section 2.5 [SPOE specification](https://www.haproxy.org/download/1
   and 0 a blacklisted IP with no doubt).
 
 Golang backend application for this example
- 
+
 ```go
 package main
 
@@ -50,6 +50,7 @@ import (
 	"github.com/negasus/haproxy-spoe-go/action"
 	"github.com/negasus/haproxy-spoe-go/agent"
 	"github.com/negasus/haproxy-spoe-go/request"
+        logger "github.com/negasus/haproxy-spoe-go/log"
 	"log"
 	"math/rand"
 	"net"
@@ -67,7 +68,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	a := agent.New(handler)
+	a := agent.New(handler, logger.NewDefaultLog())
 
 	if err := a.Serve(listener); err != nil {
 		log.Printf("error agent serve: %+v\n", err)
@@ -117,7 +118,7 @@ Getting request data is possible through `Request.Messages`
 Returns count of messages in request
 
 ```
-count := request.Messages.Len() 
+count := request.Messages.Len()
 ```
 
 #### GetByName(name string) (*Message, error)
@@ -175,7 +176,7 @@ request.Actions.UnsetVar(action.ScopeSession, "ip_score")
 
 ### KV (key-value)
 
-Contains message key-value data sent by Haproxy 
+Contains message key-value data sent by Haproxy
 
 #### Get(key string) (interface{}, bool)
 
