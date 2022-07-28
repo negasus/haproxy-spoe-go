@@ -3,15 +3,11 @@ package action
 type Actions []Action
 
 func (actions *Actions) SetVar(scope Scope, name string, value interface{}) {
-	a := Action{}
-	a.SetVar(scope, name, value)
-	*actions = append(*actions, a)
+	*actions = append(*actions, NewSetVar(scope, name, value))
 }
 
 func (actions *Actions) UnsetVar(scope Scope, name string) {
-	a := Action{}
-	a.UnsetVar(scope, name)
-	*actions = append(*actions, a)
+	*actions = append(*actions, NewUnsetVar(scope, name))
 }
 
 func (actions *Actions) Reset() {
