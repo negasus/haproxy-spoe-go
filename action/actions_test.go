@@ -9,7 +9,7 @@ import (
 
 func BenchmarkActionsPool(b *testing.B) {
 	const str = "foo"
-	as := action.NewActions()
+	as := make(action.Actions, 0)
 
 	for i := 0; i < b.N; i++ {
 		for j := 0; j < 200; j++ {

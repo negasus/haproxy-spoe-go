@@ -1,5 +1,6 @@
 package action
 
+// TODO: Drop this type and use plain []Action.
 type Actions []Action
 
 func (actions *Actions) SetVar(scope Scope, name string, value interface{}) {
@@ -12,8 +13,4 @@ func (actions *Actions) UnsetVar(scope Scope, name string) {
 
 func (actions *Actions) Reset() {
 	*actions = (*actions)[:0]
-}
-
-func NewActions() Actions {
-	return Actions{}
 }

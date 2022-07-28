@@ -1,9 +1,10 @@
 package request
 
 import (
+	"sync"
+
 	"github.com/negasus/haproxy-spoe-go/action"
 	"github.com/negasus/haproxy-spoe-go/message"
-	"sync"
 )
 
 var requestPool = sync.Pool{
@@ -17,13 +18,13 @@ type Request struct {
 	StreamID uint64
 	FrameID  uint64
 	Messages *message.Messages
-	Actions  *action.Actions
+	Actions  action.Actions
 }
 
 func newRequest() *Request {
 	m := &Request{
 		Messages: message.NewMessages(),
-		Actions:  action.NewActions(),
+		Actions:  make(action.Actions, 0, 1),
 	}
 
 	return m
