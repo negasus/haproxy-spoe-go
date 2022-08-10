@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/negasus/haproxy-spoe-go/varint"
 	"io"
+
+	"github.com/negasus/haproxy-spoe-go/varint"
 )
 
 func (f *Frame) Encode(dest io.Writer) (n int, err error) {
@@ -35,8 +36,8 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 
 	case TypeAgentAck:
 		if f.Actions != nil {
-			for _, act := range *f.Actions {
-				payload, err = (*act).Marshal(payload)
+			for _, act := range f.Actions {
+				payload, err = act.Marshal(payload)
 				if err != nil {
 					return
 				}

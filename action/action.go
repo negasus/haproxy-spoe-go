@@ -1,9 +1,5 @@
 package action
 
-import (
-	"sync"
-)
-
 type Type byte
 
 type Scope byte
@@ -22,12 +18,6 @@ const (
 	ScopeResponse    Scope = 0x04
 )
 
-var pool = sync.Pool{
-	New: func() interface{} {
-		return newAction()
-	},
-}
-
 type Action struct {
 	Type  Type
 	Scope Scope
@@ -35,42 +25,19 @@ type Action struct {
 	Value interface{}
 }
 
-func (action *Action) SetVar(scope Scope, name string, value interface{}) {
-	action.Type = TypeSetVar
-	action.Scope = scope
-	action.Name = name
-	action.Value = value
-}
-
-func (action *Action) UnsetVar(scope Scope, name string) {
-	action.Type = TypeUnsetVar
-	action.Scope = scope
-	action.Name = name
-}
-
-func newAction() *Action {
-	m := &Action{}
-
-	return m
-}
-
-func AcquireAction() *Action {
-	m := pool.Get()
-	if m == nil {
-		return newAction()
+func NewSetVar(scope Scope, name string, value interface{}) Action {
+	return Action{
+		Type:  TypeSetVar,
+		Scope: scope,
+		Name:  name,
+		Value: value,
 	}
-
-	return m.(*Action)
 }
 
-func ReleaseAction(m *Action) {
-	m.Reset()
-	pool.Put(m)
-}
-
-func (action *Action) Reset() {
-	action.Type = 0
-	action.Scope = 0
-	action.Name = ""
-	action.Value = nil
+func NewUnsetVar(scope Scope, name string) Action {
+	return Action{
+		Type:  TypeUnsetVar,
+		Scope: scope,
+		Name:  name,
+	}
 }

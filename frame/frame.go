@@ -1,10 +1,11 @@
 package frame
 
 import (
+	"sync"
+
 	"github.com/negasus/haproxy-spoe-go/action"
 	"github.com/negasus/haproxy-spoe-go/message"
 	"github.com/negasus/haproxy-spoe-go/payload/kv"
-	"sync"
 )
 
 type Type byte
@@ -46,7 +47,7 @@ type Frame struct {
 	MaxFrameSize uint32
 	KV           *kv.KV
 	Messages     *message.Messages
-	Actions      *action.Actions
+	Actions      action.Actions
 
 	tmp       [5]byte
 	varintBuf [10]byte
