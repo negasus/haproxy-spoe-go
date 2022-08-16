@@ -16,15 +16,9 @@ func (l *Log) Errorf(format string, args ...interface{}) {
 	l.l.Printf("error: "+format, args...)
 }
 
-func (l *Log) Warnf(format string, args ...interface{}) {
-	l.l.Printf("warning: "+format, args...)
-}
-
 // Log is Logger using default standard logger provided by Go standard log
 // package.
-type DefaultLog struct {
-	l *log.Logger
-}
+type DefaultLog struct{}
 
 // defaultLog is singleton representing default logger of Go log package.
 var defaultLog = &DefaultLog{}
@@ -35,8 +29,4 @@ func NewDefaultLog() *DefaultLog { return defaultLog }
 
 func (*DefaultLog) Errorf(format string, args ...interface{}) {
 	log.Printf("error: "+format, args...)
-}
-
-func (*DefaultLog) Warnf(format string, args ...interface{}) {
-	log.Printf("warning: "+format, args...)
 }

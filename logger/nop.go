@@ -11,4 +11,3 @@ type Nop struct{}
 func NewNop() *Nop { return nop }
 
 func (*Nop) Errorf(_ string, _ ...interface{}) {}
-func (*Nop) Warnf(_ string, _ ...interface{})  {}

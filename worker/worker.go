@@ -103,7 +103,7 @@ func (w *worker) run() error {
 			go w.processNotifyFrame(f)
 
 		default:
-			w.logger.Warnf("unexpected frame type: %v", f.Type)
+			w.logger.Errorf("unexpected frame type: %v", f.Type)
 		}
 	}
 }
