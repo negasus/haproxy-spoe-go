@@ -2,17 +2,15 @@ package worker
 
 import (
 	"bytes"
+	"fmt"
+
 	"github.com/negasus/haproxy-spoe-go/frame"
 	"github.com/negasus/haproxy-spoe-go/request"
-	"log"
 )
 
 func (w *worker) processNotifyFrame(f *frame.Frame) {
 
 	defer frame.ReleaseFrame(f)
-
-	var err error
-	var n int
 
 	req := request.AcquireRequest()
 	defer request.ReleaseRequest(req)
@@ -32,20 +30,27 @@ func (w *worker) processNotifyFrame(f *frame.Frame) {
 	ackFrame.FrameID = f.FrameID
 	ackFrame.Actions = req.Actions
 
-	buf := bytes.NewBuffer(make([]byte, 0))
-	n, err = ackFrame.Encode(buf)
+	err := w.writeFrame(ackFrame)
 	if err != nil {
-		log.Printf("error marshal ack frame: %v", err)
-		return
+		w.logger.Errorf("ack frame write failed: %v", err)
+	}
+}
+
+func (w *worker) writeFrame(f *frame.Frame) error {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	n, err := f.Encode(buf)
+	if err != nil {
+		return fmt.Errorf("cannot marshal frame: %w", err)
 	}
 
 	n, err = w.conn.Write(buf.Bytes())
 	if err != nil {
-		log.Printf("error write ack frame: %v", err)
-		return
+		return fmt.Errorf("cannot write frame to connection: %w", err)
 	}
 
 	if n != buf.Len() {
-		log.Printf("write wrong data count %d, expect %d", n, buf.Len())
+		return fmt.Errorf("wrote wrong number of bytes count %d, expect %d", n, buf.Len())
 	}
+
+	return nil
 }
