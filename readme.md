@@ -50,7 +50,7 @@ import (
 	"github.com/negasus/haproxy-spoe-go/action"
 	"github.com/negasus/haproxy-spoe-go/agent"
 	"github.com/negasus/haproxy-spoe-go/request"
-        logger "github.com/negasus/haproxy-spoe-go/log"
+        "github.com/negasus/haproxy-spoe-go/logger"
 	"log"
 	"math/rand"
 	"net"
