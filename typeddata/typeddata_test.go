@@ -1,8 +1,9 @@
 package typeddata
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncode_Nil(t *testing.T) {
@@ -38,9 +39,9 @@ func TestEncode_Int32(t *testing.T) {
 func TestEncode_Binary(t *testing.T) {
 	buf, n, err := Encode([]byte{0x10, 0x20, 0x30}, make([]byte, 0))
 	assert.Nil(t, err)
-	assert.Equal(t, 4, n)
-	assert.Equal(t, 4, len(buf))
-	assert.Equal(t, []byte{0x09, 0x10, 0x20, 0x30}, buf)
+	assert.Equal(t, 5, n)
+	assert.Equal(t, 5, len(buf))
+	assert.Equal(t, []byte{0x09, 0x03, 0x10, 0x20, 0x30}, buf)
 }
 
 // todo: tests

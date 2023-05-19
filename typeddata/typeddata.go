@@ -2,9 +2,10 @@ package typeddata
 
 import (
 	"fmt"
-	"github.com/negasus/haproxy-spoe-go/varint"
 	"net"
 	"reflect"
+
+	"github.com/negasus/haproxy-spoe-go/varint"
 
 	"github.com/pkg/errors"
 )
@@ -32,14 +33,14 @@ const (
 	TypeBinary byte = 9
 )
 
-//ErrEmptyBuffer describe error, if passed empty buffer for decoding
+// ErrEmptyBuffer describe error, if passed empty buffer for decoding
 var ErrEmptyBuffer = errors.New("empty buffer for decode")
 
-//ErrDecodingBufferTooSmall describe error for too small decoding buffer
+// ErrDecodingBufferTooSmall describe error for too small decoding buffer
 var ErrDecodingBufferTooSmall = errors.New("decoding buffer too small")
 
-//Encode variable to TypedData value
-//returns filled buffer, count of bytes and error
+// Encode variable to TypedData value
+// returns filled buffer, count of bytes and error
 func Encode(data interface{}, buf []byte) ([]byte, int, error) {
 	var n int
 
@@ -110,16 +111,22 @@ func Encode(data interface{}, buf []byte) ([]byte, int, error) {
 		return buf, n, nil
 
 	case []byte:
+		n = 1
 		buf = append(buf, TypeBinary)
+		b := make([]byte, 8)
+		i := varint.PutUvarint(b, uint64(len(v)))
+		n += i
+		n += len(v)
+		buf = append(buf, b[:i]...)
 		buf = append(buf, v...)
-		return buf, len(v) + 1, nil
+		return buf, n, nil
 	}
 
 	return nil, 0, fmt.Errorf("type not supported for encode to TypedData: %s", reflect.TypeOf(data).String())
 }
 
-//Decode TypedData value
-//Returns decoded variable, bytes count and error
+// Decode TypedData value
+// Returns decoded variable, bytes count and error
 func Decode(buf []byte) (data interface{}, n int, err error) {
 	if len(buf) == 0 {
 		err = ErrEmptyBuffer
