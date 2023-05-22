@@ -1,5 +1,10 @@
 # Changelog
 
+# v1.0.5 (2023-05-22)
+
+- some refactoring and remove dependencies
+- fix encode binary data, add length
+
 # v1.0.4 (2022-08-23)
 
 - Use plain Action array rather than array of pooled pointers (#13)
