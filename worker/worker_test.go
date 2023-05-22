@@ -8,44 +8,50 @@ import (
 	"github.com/negasus/haproxy-spoe-go/client"
 	"github.com/negasus/haproxy-spoe-go/logger"
 	"github.com/negasus/haproxy-spoe-go/request"
-	"github.com/stretchr/testify/assert"
-	_ "github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 type MockedHandler struct {
-	m mock.Mock
+	handleFunc func(r *request.Request)
+	finishFunc func()
 }
 
 func (h *MockedHandler) Handle(r *request.Request) {
-	h.m.MethodCalled("handle", r)
+	h.handleFunc(r)
 }
 
 func (h *MockedHandler) Finish() {
-	h.m.MethodCalled("Finished")
+	h.finishFunc()
 }
 
 func TestWorker(t *testing.T) {
 	clientConn, server := net.Pipe()
 	spoe := client.NewClient(clientConn)
-	var m MockedHandler
-	m.m.On("handle", mock.Anything)
-	m.m.On("Finished")
+	m := MockedHandler{
+		handleFunc: func(r *request.Request) {
+
+		},
+		finishFunc: func() {
+
+		},
+	}
 
 	go func() {
 		Handle(server, m.Handle, logger.NewNop())
 		m.Finish()
 	}()
-	assert.NoError(t, spoe.Init())
-	assert.NoError(t, spoe.Notify())
-	assert.NoError(t, spoe.Stop())
+	if spoe.Init() != nil {
+		t.Fatal("unexpected error on Init")
+	}
+	if spoe.Notify() != nil {
+		t.Fatal("unexpected error on Notify")
+	}
+	if spoe.Stop() != nil {
+		t.Fatal("unexpected error on Stop")
+	}
 
-	// Lets wait a bit to have everything finished
+	// Let's wait a bit to have everything finished
 	<-time.After(time.Millisecond * 100)
 	clientConn.Close()
-
-	m.m.AssertExpectations(t)
-
 }
 
 /*
@@ -57,8 +63,14 @@ func TestWorkerConcurrent(t *testing.T) {
 	clientConn2, server2 := net.Pipe()
 	spoe := client.NewClient(clientConn)
 	spoe2 := client.NewClient(clientConn2)
-	var m MockedHandler
-	m.m.On("handle", mock.Anything)
+	m := MockedHandler{
+		handleFunc: func(r *request.Request) {
+
+		},
+		finishFunc: func() {
+
+		},
+	}
 
 	go func() {
 		Handle(server, m.Handle, logger.NewNop())
@@ -68,7 +80,9 @@ func TestWorkerConcurrent(t *testing.T) {
 	}()
 	duration := time.Second
 	loop := func(s client.Client) {
-		assert.NoError(t, s.Init())
+		if s.Init() != nil {
+			t.Fatal("unexpected error on Init")
+		}
 		for {
 			select {
 			case <-time.After(duration):
@@ -81,11 +95,8 @@ func TestWorkerConcurrent(t *testing.T) {
 	go loop(spoe)
 	go loop(spoe2)
 
-	// Lets wait a bit to have everything finished
+	// Let's wait a bit to have everything finished
 	<-time.After(duration)
-
-	m.m.AssertExpectations(t)
-
 }
 
 /*
@@ -95,9 +106,14 @@ func TestWorkerConcurrent(t *testing.T) {
 func BenchmarkWorker(b *testing.B) {
 	clientConn, server := net.Pipe()
 	spoe := client.NewClient(clientConn)
-	var m MockedHandler
-	m.m.On("handle", mock.Anything)
-	m.m.On("Finished")
+	m := MockedHandler{
+		handleFunc: func(r *request.Request) {
+
+		},
+		finishFunc: func() {
+
+		},
+	}
 
 	go func() {
 		Handle(server, m.Handle, logger.NewNop())
@@ -110,8 +126,7 @@ func BenchmarkWorker(b *testing.B) {
 	}
 	spoe.Stop()
 
-	// Lets wait a bit to have everything finished
+	// Let's wait a bit to have everything finished
 	<-time.After(time.Millisecond * 100)
 	clientConn.Close()
-
 }

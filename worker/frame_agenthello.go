@@ -3,6 +3,7 @@ package worker
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/negasus/haproxy-spoe-go/frame"
 )
 

@@ -3,8 +3,6 @@ package frame
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -17,15 +15,26 @@ func TestFrame_Write(t *testing.T) {
 	f.KV.Add("key2", "val2")
 	buf := &bytes.Buffer{}
 	frameSize, err := f.Encode(buf)
-	require.Nil(t, err)
+	if err != nil {
+		t.Fatalf("expect err is nil, got %v", err)
+	}
 	bufBytes := buf.Bytes()
 	encodedFrameSize := int(binary.BigEndian.Uint32(bufBytes[0:4]))
-	assert.Equal(t, frameSize-4, encodedFrameSize, "frame size")
-	assert.Equal(t, "key1", string(bufBytes[13:17]))
-	assert.Equal(t, "val1", string(bufBytes[19:23]))
-	assert.Equal(t, "key2", string(bufBytes[24:28]))
-	assert.Equal(t, "val2", string(bufBytes[30:34]))
-
+	if frameSize-4 != encodedFrameSize {
+		t.Fatal("wrong frame size")
+	}
+	if string(bufBytes[13:17]) != "key1" {
+		t.Fatal("expect key1")
+	}
+	if string(bufBytes[19:23]) != "val1" {
+		t.Fatal("expect val1")
+	}
+	if string(bufBytes[24:28]) != "key2" {
+		t.Fatal("expect key2")
+	}
+	if string(bufBytes[30:34]) != "val2" {
+		t.Fatal("expect val1")
+	}
 }
 
 func BenchmarkFrame_Encode(b *testing.B) {

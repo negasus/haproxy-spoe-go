@@ -1,8 +1,7 @@
 package message
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"bytes"
 	"testing"
 )
 
@@ -16,29 +15,52 @@ func TestDecode(t *testing.T) {
 	}
 
 	err := mess.Decode(buf)
-	require.NoError(t, err)
-	require.Equal(t, 2, mess.Len())
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	if mess.Len() != 2 {
+		t.Fatalf("mess.Len must be 2, got %d", mess.Len())
+	}
 
 	// First message
 	m, err := mess.GetByIndex(0)
-	require.NoError(t, err)
-	assert.Equal(t, "Foo", m.Name)
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	if m.Name != "Foo" {
+		t.Fatalf("m.Name must be Foo, got %s", m.Name)
+	}
 
 	v, ok := m.KV.Get("Bar")
-	require.True(t, ok)
-	require.Equal(t, []byte{0x10, 0x20, 0x30}, v)
+	if !ok {
+		t.Fatal("ok is not true")
+	}
+	if !bytes.Equal([]byte{0x10, 0x20, 0x30}, v.([]byte)) {
+		t.Fatal("invalid result")
+	}
 
 	v, ok = m.KV.Get("Vals")
-	require.True(t, ok)
-	require.Equal(t, "Baz", v)
+	if !ok {
+		t.Fatal("ok is not true")
+	}
+	if v != "Baz" {
+		t.Fatalf("v must be Baz, got %s", v)
+	}
 
 	// Second message
 	m, err = mess.GetByIndex(1)
-	require.NoError(t, err)
-	assert.Equal(t, "UI", m.Name)
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	if m.Name != "UI" {
+		t.Fatalf("m.Name must be UI, got %s", m.Name)
+	}
 
 	v, ok = m.KV.Get("Fee")
-	require.True(t, ok)
-	require.Equal(t, int32(10), v)
-
+	if !ok {
+		t.Fatal("ok is not true")
+	}
+	if v != int32(10) {
+		t.Fatalf("v must be int32(10), got %d", v)
+	}
 }

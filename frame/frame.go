@@ -35,7 +35,7 @@ func ReleaseFrame(frame *Frame) {
 	framePool.Put(frame)
 }
 
-//Frame describe frame struct
+// Frame describe frame struct
 type Frame struct {
 	Len          uint32
 	Type         Type
@@ -80,12 +80,12 @@ func (f *Frame) Reset() {
 	f.KV.Reset()
 }
 
-//IsFin returns true, if frame has flag 'FIN'
+// IsFin returns true, if frame has flag 'FIN'
 func (f *Frame) IsFin() bool {
 	return f.Flags&0x01 > 0
 }
 
-//IsAbort returns true, if frame has flag 'ABORT'
+// IsAbort returns true, if frame has flag 'ABORT'
 func (f *Frame) IsAbort() bool {
 	return f.Flags&0x02 > 0
 }

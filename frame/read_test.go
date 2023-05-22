@@ -2,8 +2,6 @@ package frame
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"testing"
 )
@@ -25,17 +23,33 @@ func TestFrame_Read(t *testing.T) {
 	r := bytes.NewBuffer(testFrame)
 	f := NewFrame()
 	err := f.Read(r)
-	require.Nil(t, err)
-	assert.Equal(t, 1, int(f.FrameID), "FrameID")
-	assert.Equal(t, 542, int(f.StreamID), "StreamID")
-	assert.Equal(t, TypeNotify, f.Type)
+	if err != nil {
+		t.Fatal()
+	}
+	if int(f.FrameID) != 1 {
+		t.Fatal("wrong FrameID")
+	}
+	if int(f.StreamID) != 542 {
+		t.Fatal("wrong StreamID")
+	}
+	if f.Type != TypeNotify {
+		t.Fatal("wrong type")
+	}
 	messages := *f.Messages
-	require.Len(t, messages, 1)
+	if len(messages) != 1 {
+		t.Fatal("wrong messages len")
+	}
 	host, found := messages[0].KV.Get("host")
-	require.True(t, found, "key host")
+	if !found {
+		t.Fatal("host not found")
+	}
 	hostString, ok := host.(string)
-	require.True(t, ok)
-	assert.Equal(t, "domain.example.com", hostString)
+	if !ok {
+		t.Fatal("error convert host to string")
+	}
+	if hostString != "domain.example.com" {
+		t.Fatal("wrong hostString")
+	}
 }
 
 func BenchmarkFrame_Read(b *testing.B) {

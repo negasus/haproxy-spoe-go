@@ -4,24 +4,24 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/negasus/haproxy-spoe-go/frame"
-	_ "github.com/negasus/haproxy-spoe-go/request"
 	"io"
 	"net"
+
+	"github.com/negasus/haproxy-spoe-go/frame"
 )
 
-/// Client is a simple client for spop protocol, this should only be used for testing purpose
+// Client is a simple client for spop protocol, this should only be used for testing purpose
 type Client struct {
 	conn   net.Conn
 	reader io.Reader
 }
 
-/// NewClient create a new Client for an established connection
+// NewClient create a new Client for an established connection
 func NewClient(conn net.Conn) Client {
 	return Client{conn: conn, reader: bufio.NewReader(conn)}
 }
 
-/// Init initialize the client by sending the HaproxyHello frame
+// Init initialize the client by sending the HaproxyHello frame
 func (c *Client) Init() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)
@@ -70,7 +70,7 @@ func (c *Client) send(f *frame.Frame) error {
 	return nil
 }
 
-/// Notify send an empty Notify frame
+// Notify send an empty Notify frame
 func (c *Client) Notify() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)
@@ -89,7 +89,7 @@ func (c *Client) Notify() error {
 	return nil
 }
 
-/// Stop the client by sending HaproxyDisconnect frame
+// Stop the client by sending HaproxyDisconnect frame
 func (c *Client) Stop() error {
 	f := frame.AcquireFrame()
 	defer frame.ReleaseFrame(f)

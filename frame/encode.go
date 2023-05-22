@@ -10,7 +10,6 @@ import (
 )
 
 func (f *Frame) Encode(dest io.Writer) (n int, err error) {
-
 	buf := bytes.Buffer{}
 
 	buf.WriteByte(byte(f.Type))
@@ -45,7 +44,7 @@ func (f *Frame) Encode(dest io.Writer) (n int, err error) {
 		}
 	case TypeNotify:
 		if len(*f.Messages) > 0 {
-			err = fmt.Errorf("Encoding Notify frame with Message isn't handled yet")
+			err = fmt.Errorf("encoding Notify frame with Message isn't handled yet")
 			return
 
 		}

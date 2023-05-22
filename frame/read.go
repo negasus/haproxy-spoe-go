@@ -3,8 +3,9 @@ package frame
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/negasus/haproxy-spoe-go/varint"
 	"io"
+
+	"github.com/negasus/haproxy-spoe-go/varint"
 )
 
 func (f *Frame) Read(src io.Reader) error {
@@ -23,7 +24,7 @@ func (f *Frame) Read(src io.Reader) error {
 	f.Type = Type(f.tmp[4])
 
 	// Drop packet that doesn't have defined frame type early, before allocating any buffers
-	// that way spurious connectons (say someone calling curl on port) won't cause it to
+	// that way spurious connections (say someone calling curl on port) won't cause it to
 	// allocate gigabytes of RAM
 	switch f.Type {
 	case TypeHaproxyHello, TypeHaproxyDisconnect, TypeNotify, TypeAgentHello, TypeAgentDisconnect, TypeAgentAck:

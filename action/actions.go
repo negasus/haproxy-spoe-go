@@ -1,6 +1,5 @@
 package action
 
-// TODO: Drop this type and use plain []Action.
 type Actions []Action
 
 func (actions *Actions) SetVar(scope Scope, name string, value interface{}) {

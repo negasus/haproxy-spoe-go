@@ -5,7 +5,6 @@ import (
 )
 
 func (m *Messages) Decode(buf []byte) error {
-
 	for {
 		if len(buf) == 0 {
 			break

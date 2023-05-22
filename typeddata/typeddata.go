@@ -1,13 +1,12 @@
 package typeddata
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"reflect"
 
 	"github.com/negasus/haproxy-spoe-go/varint"
-
-	"github.com/pkg/errors"
 )
 
 const (

@@ -1,8 +1,9 @@
 package message
 
 import (
-	"github.com/negasus/haproxy-spoe-go/payload/kv"
 	"sync"
+
+	"github.com/negasus/haproxy-spoe-go/payload/kv"
 )
 
 var messagePool = sync.Pool{

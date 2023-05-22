@@ -9,7 +9,6 @@ import (
 )
 
 func (w *worker) processNotifyFrame(f *frame.Frame) {
-
 	defer frame.ReleaseFrame(f)
 
 	req := request.AcquireRequest()
