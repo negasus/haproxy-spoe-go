@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/negasus/haproxy-spoe-go/action"
+	"github.com/github/haproxy-spoe-go/action"
 )
 
 func BenchmarkActionsPool(b *testing.B) {

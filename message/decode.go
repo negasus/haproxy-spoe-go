@@ -1,7 +1,7 @@
 package message
 
 import (
-	"github.com/negasus/haproxy-spoe-go/varint"
+	"github.com/github/haproxy-spoe-go/varint"
 )
 
 func (m *Messages) Decode(buf []byte) error {

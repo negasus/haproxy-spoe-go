@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/negasus/haproxy-spoe-go/client"
-	"github.com/negasus/haproxy-spoe-go/logger"
-	"github.com/negasus/haproxy-spoe-go/request"
+	"github.com/github/haproxy-spoe-go/client"
+	"github.com/github/haproxy-spoe-go/logger"
+	"github.com/github/haproxy-spoe-go/request"
 )
 
 type MockedHandler struct {
