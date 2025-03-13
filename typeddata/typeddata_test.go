@@ -32,7 +32,7 @@ func TestEncode_Bool(t *testing.T) {
 	if len(buf) != 1 {
 		t.Fatalf("buf len must be 1, got %d", len(buf))
 	}
-	if buf[0] != 0x10 {
+	if buf[0] != 0x01 {
 		t.Fatalf("invalid buf value")
 	}
 
