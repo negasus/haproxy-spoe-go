@@ -1,5 +1,9 @@
 # Changelog
 
+# v1.0.6 (2024-03-13)
+
+- bugfix: `false` value has incorrect encoding value - invert flag and value (#22) Brendan Forster*
+
 # v1.0.5 (2023-05-22)
 
 - some refactoring and remove dependencies
