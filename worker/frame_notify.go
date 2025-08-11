@@ -10,6 +10,7 @@ import (
 
 func (w *worker) processNotifyFrame(f *frame.Frame) {
 	defer frame.ReleaseFrame(f)
+	defer w.wg.Done()
 
 	req := request.AcquireRequest()
 	defer request.ReleaseRequest(req)

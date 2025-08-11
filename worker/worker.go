@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 
 	"github.com/negasus/haproxy-spoe-go/frame"
 	"github.com/negasus/haproxy-spoe-go/logger"
@@ -35,6 +36,8 @@ type worker struct {
 	handler  func(*request.Request)
 
 	logger logger.Logger
+
+	wg sync.WaitGroup
 }
 
 func (w *worker) close() {
@@ -45,7 +48,11 @@ func (w *worker) close() {
 
 func (w *worker) run() error {
 
-	defer w.close()
+	defer func() {
+		// Wait for all in-flight notify handlers to finish before closing conn
+		w.wg.Wait()
+		w.close()
+	}()
 
 	var f *frame.Frame
 
@@ -100,6 +107,7 @@ func (w *worker) run() error {
 				return fmt.Errorf("worker not ready, but got Notify frame")
 			}
 
+			w.wg.Add(1)
 			go w.processNotifyFrame(f)
 
 		default:
