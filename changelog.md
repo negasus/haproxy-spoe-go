@@ -1,5 +1,9 @@
 # Changelog
 
+# v1.0.7 (2025-08-18)
+
+- worker: wait for in-flight Notify handlers before closing (#26) Simon Taranto* 
+
 # v1.0.6 (2024-03-13)
 
 - bugfix: `false` value has incorrect encoding value - invert flag and value (#22) Brendan Forster*
