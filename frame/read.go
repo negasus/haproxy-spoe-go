@@ -32,9 +32,14 @@ func (f *Frame) Read(src io.Reader) error {
 		return fmt.Errorf("unexpected frame type %d", f.Type)
 	}
 
-	buf := make([]byte, f.Len-1)
+	payloadLen := int(f.Len - 1)
+	if cap(f.readBuf) < payloadLen {
+		f.readBuf = make([]byte, payloadLen)
+	} else {
+		f.readBuf = f.readBuf[:payloadLen]
+	}
 
-	n, err = io.ReadFull(src, buf)
+	n, err = io.ReadFull(src, f.readBuf)
 	if err != nil {
 		return fmt.Errorf("error read frame, %v", err)
 	}
@@ -42,6 +47,8 @@ func (f *Frame) Read(src io.Reader) error {
 	if uint32(n) != f.Len-1 {
 		return fmt.Errorf("unexpected frame length %d, expect %d", n, f.Len)
 	}
+
+	buf := f.readBuf
 
 	f.Flags = binary.BigEndian.Uint32(buf[0:4])
 	buf = buf[4:]
