@@ -49,6 +49,7 @@ type Frame struct {
 	Messages     *message.Messages
 	Actions      action.Actions
 
+	readBuf   []byte // reusable read buffer, retained across pool cycles
 	tmp       [5]byte
 	varintBuf [10]byte
 }
