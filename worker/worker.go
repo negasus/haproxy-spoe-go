@@ -2,10 +2,12 @@ package worker
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"sync"
+	"syscall"
 
 	"github.com/negasus/haproxy-spoe-go/frame"
 	"github.com/negasus/haproxy-spoe-go/logger"
@@ -63,10 +65,10 @@ func (w *worker) run() error {
 
 		if err := f.Read(buf); err != nil {
 			frame.ReleaseFrame(f)
-			if err != io.EOF {
-				return fmt.Errorf("error read frame: %v", err)
+			if isConnectionClose(err) {
+				return nil
 			}
-			return nil
+			return fmt.Errorf("error read frame: %v", err)
 		}
 
 		switch f.Type {
@@ -114,4 +116,19 @@ func (w *worker) run() error {
 			w.logger.Errorf("unexpected frame type: %v", f.Type)
 		}
 	}
+}
+
+// isConnectionClose reports whether err indicates the peer closed the
+// connection. HAProxy 3.x's mux_spop tears down TCP connections without
+// sending a DISCONNECT frame when all SPOP streams are done, resulting
+// in ECONNRESET or EPIPE instead of io.EOF.
+func isConnectionClose(err error) bool {
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+		return true
+	}
+	if errors.Is(err, syscall.ECONNRESET) || errors.Is(err, syscall.EPIPE) {
+		return true
+	}
+	var netErr *net.OpError
+	return errors.As(err, &netErr) && !netErr.Temporary()
 }
