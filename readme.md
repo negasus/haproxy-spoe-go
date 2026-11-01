@@ -47,6 +47,8 @@ Golang backend application for this example
 package main
 
 import (
+	"context"
+	"errors"
 	"github.com/negasus/haproxy-spoe-go/action"
 	"github.com/negasus/haproxy-spoe-go/agent"
 	"github.com/negasus/haproxy-spoe-go/request"
@@ -55,6 +57,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"os/signal"
 )
 
 func main() {
@@ -70,7 +73,11 @@ func main() {
 
 	a := agent.New(handler, logger.NewDefaultLog())
 
-	if err := a.Serve(listener); err != nil {
+	// Stop accepting new connections on Ctrl+C
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	if err := a.ServeContext(ctx, listener); err != nil && !errors.Is(err, context.Canceled) {
 		log.Printf("error agent serve: %+v\n", err)
 	}
 }
