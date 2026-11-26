@@ -198,3 +198,35 @@ func TestServeContext_AcceptedConnectionSurvivesCancel(t *testing.T) {
 		t.Fatalf("unexpected response type: got %v, want AgentDisconnect", got)
 	}
 }
+
+// tempError is a net.Error that reports itself as temporary
+type tempError struct{}
+
+func (tempError) Error() string   { return "temporary accept error" }
+func (tempError) Timeout() bool   { return false }
+func (tempError) Temporary() bool { return true }
+
+// tempErrorListener always fails Accept with a temporary error and counts calls to Close
+type tempErrorListener struct {
+	closes atomic.Int32
+}
+
+func (l *tempErrorListener) Accept() (net.Conn, error) { return nil, tempError{} }
+func (l *tempErrorListener) Close() error              { l.closes.Add(1); return nil }
+func (l *tempErrorListener) Addr() net.Addr            { return &net.TCPAddr{} }
+
+func TestServeContext_CancelledWithAcceptError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	l := &tempErrorListener{}
+
+	// Accept fails independently of the listener being closed, so ServeContext can
+	// see the cancelled context before the watcher has run
+	if err := newAgent().ServeContext(ctx, l); !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+	if got := l.closes.Load(); got != 1 {
+		t.Fatalf("expected listener to be closed once, got %d", got)
+	}
+}

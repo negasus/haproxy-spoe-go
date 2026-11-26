@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"net"
+	"sync"
 
 	"github.com/negasus/haproxy-spoe-go/logger"
 	"github.com/negasus/haproxy-spoe-go/request"
@@ -35,6 +36,10 @@ func (agent *Agent) Serve(listener net.Listener) error {
 // When ctx is done the listener is closed and ctx.Err() is returned.
 // Connections already accepted are not interrupted.
 func (agent *Agent) ServeContext(ctx context.Context, listener net.Listener) error {
+	// Closing may be attempted by both the watcher and the accept loop, so make it happen once
+	var closeOnce sync.Once
+	closeListener := func() { closeOnce.Do(func() { listener.Close() }) }
+
 	// context.Background() and similar are never done, so no watcher is needed
 	if ctx.Done() != nil {
 		done := make(chan struct{})
@@ -44,7 +49,7 @@ func (agent *Agent) ServeContext(ctx context.Context, listener net.Listener) err
 			defer close(stopped)
 			select {
 			case <-ctx.Done():
-				listener.Close()
+				closeListener()
 			case <-done:
 			}
 		}()
@@ -60,6 +65,8 @@ func (agent *Agent) ServeContext(ctx context.Context, listener net.Listener) err
 		conn, err := listener.Accept()
 		if err != nil {
 			if ctx.Err() != nil {
+				// The watcher may not have run yet, so close here too
+				closeListener()
 				return ctx.Err()
 			}
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
