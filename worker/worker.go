@@ -95,13 +95,19 @@ func (w *worker) run() error {
 
 		case frame.TypeHaproxyDisconnect:
 			if !w.ready {
+				frame.ReleaseFrame(f)
 				return fmt.Errorf("worker not ready, but got HaproxyDisconnect frame")
 			}
 
-			if err := w.sendAgentDisconnect(f, 0, "connection closed by server"); err != nil {
-				return fmt.Errorf("error send AgentDisconnect frame: %v", err)
-			}
+			err := w.sendAgentDisconnect(f, 0, "connection closed by server")
 			frame.ReleaseFrame(f)
+			if err != nil {
+				// The peer may have already closed after sending DISCONNECT.
+				if errors.Is(err, syscall.EPIPE) || errors.Is(err, syscall.ECONNRESET) || errors.Is(err, net.ErrClosed) {
+					return nil
+				}
+				return fmt.Errorf("error send AgentDisconnect frame: %w", err)
+			}
 			return nil
 
 		case frame.TypeNotify:
