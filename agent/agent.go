@@ -1,7 +1,9 @@
 package agent
 
 import (
+	"context"
 	"net"
+	"sync"
 
 	"github.com/negasus/haproxy-spoe-go/logger"
 	"github.com/negasus/haproxy-spoe-go/request"
@@ -22,10 +24,51 @@ type Agent struct {
 	logger  logger.Logger
 }
 
+// Serve accepts connections on the listener and handles each in a new goroutine.
+// It is equivalent to ServeContext with context.Background().
 func (agent *Agent) Serve(listener net.Listener) error {
+	return agent.ServeContext(context.Background(), listener)
+}
+
+// ServeContext accepts connections on the listener and handles each in a new goroutine
+// until ctx is done or the listener returns a non-temporary error.
+//
+// When ctx is done the listener is closed and ctx.Err() is returned.
+// Connections already accepted are not interrupted.
+func (agent *Agent) ServeContext(ctx context.Context, listener net.Listener) error {
+	// Closing may be attempted by both the watcher and the accept loop, so make it happen once
+	var closeOnce sync.Once
+	closeListener := func() { closeOnce.Do(func() { listener.Close() }) }
+
+	// context.Background() and similar are never done, so no watcher is needed
+	if ctx.Done() != nil {
+		done := make(chan struct{})
+		stopped := make(chan struct{})
+
+		go func() {
+			defer close(stopped)
+			select {
+			case <-ctx.Done():
+				closeListener()
+			case <-done:
+			}
+		}()
+
+		// Make sure the watcher has exited before returning
+		defer func() {
+			close(done)
+			<-stopped
+		}()
+	}
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
+			if ctx.Err() != nil {
+				// The watcher may not have run yet, so close here too
+				closeListener()
+				return ctx.Err()
+			}
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
 				continue
 			}
