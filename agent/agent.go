@@ -62,6 +62,10 @@ func (agent *Agent) ServeContext(ctx context.Context, listener net.Listener) err
 	}
 
 	for {
+		if err := ctx.Err(); err != nil {
+			closeListener()
+			return err
+		}
 		conn, err := listener.Accept()
 		if err != nil {
 			if ctx.Err() != nil {
